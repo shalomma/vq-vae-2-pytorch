@@ -82,7 +82,7 @@ def train(epoch, loader, model, optimizer, scheduler, device):
 
 
 def main(args):
-    device = "cuda"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     args.distributed = dist.get_world_size() > 1
 
@@ -95,7 +95,8 @@ def main(args):
         ]
     )
 
-    dataset = datasets.ImageFolder(args.path, transform=transform)
+    # dataset = datasets.ImageFolder(args.path, transform=transform)
+    dataset = datasets.CIFAR10('./data/', download=True, transform=transform)
     sampler = dist.data_sampler(dataset, shuffle=True, distributed=args.distributed)
     loader = DataLoader(
         dataset, batch_size=128 // args.n_gpu, sampler=sampler, num_workers=2
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     parser.add_argument("--epoch", type=int, default=560)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--sched", type=str)
-    parser.add_argument("path", type=str)
+    # parser.add_argument("path", type=str)
 
     args = parser.parse_args()
 
