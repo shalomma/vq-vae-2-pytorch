@@ -27,7 +27,6 @@ def sample_model(model, device, batch, size, temperature, condition=None):
 def load_model(model, checkpoint, device):
     ckpt = torch.load(os.path.join('checkpoint', checkpoint))
 
-    
     if 'args' in ckpt:
         args = ckpt['args']
 
@@ -36,7 +35,7 @@ def load_model(model, checkpoint, device):
 
     elif model == 'pixelsnail_top':
         model = PixelSNAIL(
-            [32, 32],
+            [4, 4],
             512,
             args.channel,
             5,
@@ -49,7 +48,7 @@ def load_model(model, checkpoint, device):
 
     elif model == 'pixelsnail_bottom':
         model = PixelSNAIL(
-            [64, 64],
+            [8, 8],
             512,
             args.channel,
             5,
