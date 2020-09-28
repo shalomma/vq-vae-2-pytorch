@@ -71,7 +71,7 @@ def train(epoch, loader, model, optimizer, scheduler, device):
                     out, _ = model(sample)
 
                 utils.save_image(
-                    torch.cat([sample, out], 0),
+                    torch.cat([sample, out + 0.5], 0),
                     f"sample/{str(epoch + 1).zfill(5)}_{str(i).zfill(5)}.png",
                     nrow=sample_size,
                     normalize=True,
@@ -88,10 +88,10 @@ def main(args):
 
     transform = transforms.Compose(
         [
-            transforms.Resize(args.size),
-            transforms.CenterCrop(args.size),
+            # transforms.Resize(args.size),
+            # transforms.CenterCrop(args.size),
             transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+            transforms.Normalize([0.5, 0.5, 0.5], [1, 1, 1]),
         ]
     )
 
