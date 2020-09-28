@@ -3,11 +3,11 @@ import pickle
 
 import torch
 from torch.utils.data import DataLoader
-from torchvision import transforms
+from torchvision import transforms, datasets
 import lmdb
 from tqdm import tqdm
 
-from dataset import ImageFileDataset, CodeRow
+from dataset import CodeRow
 from vqvae import VQVAE
 
 
@@ -35,25 +35,25 @@ def extract(lmdb_env, loader, model, device):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--size', type=int, default=256)
     parser.add_argument('--ckpt', type=str)
     parser.add_argument('--name', type=str)
-    parser.add_argument('path', type=str)
+    # parser.add_argument('path', type=str)
 
     args = parser.parse_args()
 
-    device = 'cuda'
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     transform = transforms.Compose(
         [
-            transforms.Resize(args.size),
-            transforms.CenterCrop(args.size),
+            # transforms.Resize(args.size),
+            # transforms.CenterCrop(args.size),
             transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+            transforms.Normalize([0.5, 0.5, 0.5], [1, 1, 1]),
         ]
     )
 
-    dataset = ImageFileDataset(args.path, transform=transform)
+    # dataset = ImageFileDataset(args.path, transform=transform)
+    dataset = datasets.CIFAR10('./data/', download=True, transform=transform)
     loader = DataLoader(dataset, batch_size=128, shuffle=False, num_workers=4)
 
     model = VQVAE()
