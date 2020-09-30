@@ -25,13 +25,14 @@ import distributed as dist_fn
 
 
 class Quantize(nn.Module):
-    def __init__(self, dim, n_embed, decay=0.99, eps=1e-5):
+    def __init__(self, dim, n_embed, decay=0.99, eps=1e-5, quant_noise=1):
         super().__init__()
 
         self.dim = dim
         self.n_embed = n_embed
         self.decay = decay
         self.eps = eps
+        self.quant_noise = quant_noise
 
         embed = torch.randn(dim, n_embed)
         self.register_buffer("embed", embed)
@@ -40,19 +41,27 @@ class Quantize(nn.Module):
 
     def forward(self, input):
         flatten = input.reshape(-1, self.dim)
+
+        p = self.quant_noise if self.training else 1
+        mask = torch.zeros(flatten.shape[0], device=input.device).bernoulli_(p).to(torch.bool)
+
         dist = (
-            flatten.pow(2).sum(1, keepdim=True)
-            - 2 * flatten @ self.embed
+            flatten[mask].pow(2).sum(1, keepdim=True)
+            - 2 * flatten[mask] @ self.embed
             + self.embed.pow(2).sum(0, keepdim=True)
         )
         _, embed_ind = (-dist).max(1)
         embed_onehot = F.one_hot(embed_ind, self.n_embed).type(flatten.dtype)
-        embed_ind = embed_ind.view(*input.shape[:-1])
-        quantize = self.embed_code(embed_ind)
+
+        # Quantize and un flatten
+        quantize = torch.zeros(flatten.shape, device=input.device)
+        quantize[mask] = torch.matmul(embed_onehot, self.embed.T)
+        quantize[~mask] = flatten[~mask]
+        quantize = quantize.view(*input.shape)
 
         if self.training:
             embed_onehot_sum = embed_onehot.sum(0)
-            embed_sum = flatten.transpose(0, 1) @ embed_onehot
+            embed_sum = flatten[mask].transpose(0, 1) @ embed_onehot
 
             dist_fn.all_reduce(embed_onehot_sum)
             dist_fn.all_reduce(embed_sum)
