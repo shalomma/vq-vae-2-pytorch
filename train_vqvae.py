@@ -71,7 +71,7 @@ def train(epoch, loader, model, optimizer, scheduler, device):
                     out, _ = model(sample)
 
                 utils.save_image(
-                    torch.cat([sample, out + 0.5], 0),
+                    torch.cat([sample, out], 0),
                     f"sample/{str(epoch + 1).zfill(5)}_{str(i).zfill(5)}.png",
                     nrow=sample_size,
                     normalize=True,
@@ -91,7 +91,7 @@ def main(args):
             # transforms.Resize(args.size),
             # transforms.CenterCrop(args.size),
             transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [1, 1, 1]),
+            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         ]
     )
 
@@ -102,7 +102,7 @@ def main(args):
         dataset, batch_size=128 // args.n_gpu, sampler=sampler, num_workers=2
     )
 
-    model = VQVAE().to(device)
+    model = VQVAE(quant_noise=args.q).to(device)
 
     if args.distributed:
         model = nn.parallel.DistributedDataParallel(
@@ -144,6 +144,7 @@ if __name__ == "__main__":
     parser.add_argument("--epoch", type=int, default=560)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--sched", type=str)
+    parser.add_argument("--q", type=float, default=1.0)
     # parser.add_argument("path", type=str)
 
     args = parser.parse_args()

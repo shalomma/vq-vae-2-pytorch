@@ -25,7 +25,7 @@ import distributed as dist_fn
 
 
 class Quantize(nn.Module):
-    def __init__(self, dim, n_embed, decay=0.99, eps=1e-5, quant_noise=1):
+    def __init__(self, dim, n_embed, decay=0.99, eps=1e-5, quant_noise=1.0):
         super().__init__()
 
         self.dim = dim
@@ -180,18 +180,19 @@ class VQVAE(nn.Module):
         embed_dim=64,
         n_embed=512,
         decay=0.99,
+        quant_noise=1.0
     ):
         super().__init__()
 
         self.enc_b = Encoder(in_channel, channel, n_res_block, n_res_channel, stride=4)
         self.enc_t = Encoder(channel, channel, n_res_block, n_res_channel, stride=2)
         self.quantize_conv_t = nn.Conv2d(channel, embed_dim, 1)
-        self.quantize_t = Quantize(embed_dim, n_embed)
+        self.quantize_t = Quantize(embed_dim, n_embed, quant_noise)
         self.dec_t = Decoder(
             embed_dim, embed_dim, channel, n_res_block, n_res_channel, stride=2
         )
         self.quantize_conv_b = nn.Conv2d(embed_dim + channel, embed_dim, 1)
-        self.quantize_b = Quantize(embed_dim, n_embed)
+        self.quantize_b = Quantize(embed_dim, n_embed, quant_noise)
         self.upsample_t = nn.ConvTranspose2d(
             embed_dim, embed_dim, 4, stride=2, padding=1
         )
