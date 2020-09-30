@@ -94,6 +94,6 @@ if __name__ == '__main__':
     )
 
     decoded_sample = model_vqvae.decode_code(top_sample, bottom_sample)
-    decoded_sample = (decoded_sample + 0.5).clamp(-1, 1)
+    # decoded_sample = decoded_sample.clamp(-1, 1)
 
     save_image(decoded_sample, args.filename, normalize=True, range=(-1, 1))
