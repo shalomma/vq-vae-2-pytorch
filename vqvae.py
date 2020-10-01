@@ -57,7 +57,9 @@ class Quantize(nn.Module):
         quantize = torch.zeros(flatten.shape, device=input.device)
         quantize[mask] = torch.matmul(embed_onehot, self.embed.T)
         quantize[~mask] = flatten[~mask]
+
         quantize = quantize.view(*input.shape)
+        embed_ind = embed_ind.view(*input.shape[:-1])
 
         if self.training:
             embed_onehot_sum = embed_onehot.sum(0)
