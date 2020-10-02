@@ -100,6 +100,9 @@ if __name__ == '__main__':
     if args.ckpt is not None:
         ckpt = torch.load(args.ckpt)
         args = ckpt['args']
+        start_epoch = int(args.ckpt.split('_')[-1].split('.')[0]) + 1
+    else:
+        start_epoch = 0
 
     if args.hier == 'top':
         model = PixelSNAIL(
@@ -147,7 +150,7 @@ if __name__ == '__main__':
             optimizer, args.lr, n_iter=len(loader) * args.epoch, momentum=None
         )
 
-    for i in range(args.epoch):
+    for i in range(start_epoch, args.epoch):
         train(args, i, loader, model, optimizer, scheduler, device)
         torch.save(
             {'model': model.module.state_dict(), 'args': args},
