@@ -1,5 +1,7 @@
 data/
 .idea/
+.DS_Store
+*.mdb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
