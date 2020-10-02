@@ -98,9 +98,9 @@ if __name__ == '__main__':
     ckpt = {}
 
     if args.ckpt is not None:
-        ckpt = torch.load(args.ckpt)
-        args = ckpt['args']
         start_epoch = int(args.ckpt.split('_')[-1].split('.')[0]) + 1
+        ckpt = torch.load(args.ckpt, map_location=torch.device('cpu'))
+        args = ckpt['args']
     else:
         start_epoch = 0
 
