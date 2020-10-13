@@ -97,4 +97,4 @@ if __name__ == '__main__':
     # decoded_sample = decoded_sample.clamp(-1, 1)
 
     for i in range(args.batch):
-        save_image(decoded_sample[i], f'{i}_args.filename', normalize=True, range=(-1, 1))
+        save_image(decoded_sample[i], f'{i}_{args.filename}', normalize=True, range=(-1, 1))
